@@ -1,0 +1,109 @@
+import pygame
+import random
+
+# Pygame ko initialize karte hain
+pygame.init()
+
+# Screen dimensions
+SCREEN_WIDTH = 800
+SCREEN_HEIGHT = 600
+screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+pygame.display.set_caption("Ramayan: Battle of Ram Ji")
+
+# Colors
+WHITE = (255, 255, 255)
+BLUE = (0, 0, 255)
+RED = (255, 0, 0)
+BLACK = (0, 0, 0)
+
+# Ram Ji aur Rakshasa ki attributes
+ram_health = 300
+ram_x, ram_y = 100, 250
+ram_width, ram_height = 50, 50
+
+rakshasa_health = 200
+rakshasa_x, rakshasa_y = 500, 250
+rakshasa_width, rakshasa_height = 50, 50
+
+# Ram Ji aur Rakshasa ke liye basic rectangular shapes
+ram_image = pygame.Surface((ram_width, ram_height))
+ram_image.fill(BLUE)
+
+rakshasa_image = pygame.Surface((rakshasa_width, rakshasa_height))
+rakshasa_image.fill(RED)
+
+# Font to display health
+font = pygame.font.Font(None, 36)
+
+# Function to display health
+def display_health():
+    ram_health_text = font.render(f"Ram Ji Health: {ram_health}", True, BLACK)
+    rakshasa_health_text = font.render(f"Rakshasa Health: {rakshasa_health}", True, BLACK)
+    screen.blit(ram_health_text, (10, 10))
+    screen.blit(rakshasa_health_text, (SCREEN_WIDTH - rakshasa_health_text.get_width() - 10, 10))
+
+# Function to generate random attack damage
+def attack_damage(min_damage, max_damage):
+    return random.randint(min_damage, max_damage)
+
+# Game loop
+running = True
+while running:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+
+    # Get key presses for movement and actions
+    keys = pygame.key.get_pressed()
+
+    # Move Ram Ji using arrow keys
+    if keys[pygame.K_LEFT]:
+        ram_x -= 5
+    if keys[pygame.K_RIGHT]:
+        ram_x += 5
+    if keys[pygame.K_UP]:
+        ram_y -= 5
+    if keys[pygame.K_DOWN]:
+        ram_y += 5
+
+    # Ram Ji ko screen ke bahar nahi jane dena
+    if ram_x < 0:
+        ram_x = 0
+    if ram_x > SCREEN_WIDTH - ram_width:
+        ram_x = SCREEN_WIDTH - ram_width
+    if ram_y < 0:
+        ram_y = 0
+    if ram_y > SCREEN_HEIGHT - ram_height:
+        ram_y = SCREEN_HEIGHT - ram_height
+
+    # Jab Ram Ji Rakshasa ke paas pahunche
+    if ram_x + ram_width > rakshasa_x and ram_x < rakshasa_x + rakshasa_width:
+        # Battle damage calculation
+        if ram_health > 0 and rakshasa_health > 0:
+            damage_to_rakshasa = attack_damage(10, 40)
+            damage_to_ram = attack_damage(5, 30)
+            rakshasa_health -= damage_to_rakshasa
+            ram_health -= damage_to_ram
+
+    # Game over condition
+    if ram_health <= 0:
+        print("Ram Ji ko hara diya gaya! Game Over!")
+        break
+    if rakshasa_health <= 0:
+        print("Rakshasa ko hara diya gaya! Ram Ji jeet gaye!")
+        break
+
+    # Screen update
+    screen.fill(WHITE)
+    screen.blit(ram_image, (ram_x, ram_y))
+    screen.blit(rakshasa_image, (rakshasa_x, rakshasa_y))
+    display_health()
+
+    # Update screen
+    pygame.display.update()
+
+    # Slow down the game
+    pygame.time.delay(100)
+
+# Quit Pygame
+pygame.quit()
